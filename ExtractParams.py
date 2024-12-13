@@ -23,8 +23,8 @@ def extract_acoustic_features(wav_file):
             "Spectral Rolloff": np.mean(librosa.feature.spectral_rolloff(y=y, sr=sr)),
             "MFCC Mean": np.mean(librosa.feature.mfcc(y=y, sr=sr), axis=1).tolist(),
             "Pitch (Fundamental Frequency)": np.mean(librosa.yin(y, fmin=50, fmax=500, sr=sr)),
-            "Shimmer": "Sigma",
-            "Jitter" : "Sigma"
+            # "Shimmer": "Sigma",
+            # "Jitter" : "Sigma"
             
         }
         
