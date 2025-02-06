@@ -3,7 +3,6 @@ import React, { useEffect } from 'react';
 import 'aos/dist/aos.css';
 import AOS from 'aos';
 import Image from 'next/image';
-import FuturisticBackground from '../components/background';
 
 
 export default function Home() {
@@ -15,7 +14,7 @@ export default function Home() {
 
     <div className="min-h-screen bg-gray-900 text-white font-sans">
 
-      <FuturisticBackground />
+
       {/* Header */}
       <header className="flex items-center justify-between p-6 bg-black bg-opacity-80 fixed top-0 left-0 right-0 z-50">
         <div className="text-2xl font-bold">Dysarthria Diagnostics</div>
@@ -30,14 +29,8 @@ export default function Home() {
         </nav>
       </header>
 
-      {/* Hero Section */}
       <section id="hero" className="relative h-screen flex items-center justify-center overflow-hidden">
-        {/* Animated Background */}
-        <div className="absolute inset-0 -z-10">
-          <FuturisticBackground />
-        </div>
 
-        {/* Hero Content */}
         <div className="relative z-10 text-center px-4" data-aos="fade-up">
           <h1 className="text-6xl font-extrabold mb-4">
             Diagnosing Dysarthria with AI
