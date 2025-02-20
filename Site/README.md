@@ -1,2 +1,2 @@
-# NextToDoList
-A Todo List using Next.js
+# Site
+Sigma Site
