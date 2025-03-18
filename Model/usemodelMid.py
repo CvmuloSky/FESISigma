@@ -71,8 +71,8 @@ def predict(file_path, model, device):
 
 
 def main():
-    wav_file = "TestRecordings\MaleDysarthriaTest.wav"
-    model_path = "models\98.88speechmodelv2.pth"
+    wav_file = "Model\TestSamples\TestSample(4).wav"
+    model_path = "Model\speechmodelvi.pth"
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -89,7 +89,7 @@ def main():
     result = predict(wav_file, model, device)
     if result is not None:
         features, prediction = result
-        print(f"Prediction for {wav_file}: {prediction * 100:.4f}% Dysarthria")
+        print(f"Prediction for {wav_file}: {prediction * 150:.4f}% Control")
         plot_waveform_and_features(wav_file, features, prediction)
 
 if __name__ == "__main__":

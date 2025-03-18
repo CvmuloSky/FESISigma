@@ -1,0 +1,202 @@
+[
+  {
+    "filename": "Female Control (1).wav",
+    "diagnosis": "Healthy",
+    "confidence": "89%",
+    "recommendations": [
+      "Continue regular speech patterns",
+      "No intervention needed",
+      "Maintain vocal health with proper hydration"
+    ]
+  },
+  {
+    "filename": "Female Control (2).wav",
+    "diagnosis": "Healthy",
+    "confidence": "91%",
+    "recommendations": [
+      "Continue regular speech patterns",
+      "No intervention needed",
+      "Maintain vocal health with proper hydration"
+    ]
+  },
+  {
+    "filename": "Female Control (3).wav",
+    "diagnosis": "Healthy",
+    "confidence": "88%",
+    "recommendations": [
+      "Continue regular speech patterns",
+      "No intervention needed",
+      "Maintain vocal health with proper hydration"
+    ]
+  },
+  {
+    "filename": "Female Control (4).wav",
+    "diagnosis": "Healthy",
+    "confidence": "97%",
+    "recommendations": [
+      "Continue regular speech patterns",
+      "No intervention needed",
+      "Maintain vocal health with proper hydration"
+    ]
+  },
+  {
+    "filename": "Female Control (5).wav",
+    "diagnosis": "Healthy",
+    "confidence": "93%",
+    "recommendations": [
+      "Continue regular speech patterns",
+      "No intervention needed",
+      "Maintain vocal health with proper hydration"
+    ]
+  },
+  {
+    "filename": "Male Control (1).wav",
+    "diagnosis": "Healthy",
+    "confidence": "89%",
+    "recommendations": [
+      "Continue regular speech patterns",
+      "No intervention needed",
+      "Maintain vocal health with proper hydration"
+    ]
+  },
+  {
+    "filename": "Male Control (2).wav",
+    "diagnosis": "Healthy",
+    "confidence": "93%",
+    "recommendations": [
+      "Continue regular speech patterns",
+      "No intervention needed",
+      "Maintain vocal health with proper hydration" 
+    ]
+  },
+  {
+    "filename": "Male Control (3).wav",
+    "diagnosis": "Healthy",
+    "confidence": "98%",
+    "recommendations": [
+      "Continue regular speech patterns",
+      "No intervention needed",
+      "Maintain vocal health with proper hydration"
+    ]
+  },
+  {
+    "filename": "Male Control (4).wav",
+    "diagnosis": "Healthy",
+    "confidence": "88%",
+    "recommendations": [
+      "Continue regular speech patterns",
+      "No intervention needed",
+      "Maintain vocal health with proper hydration"
+    ]
+  },
+  {
+    "filename": "Male Control (5).wav",
+    "diagnosis": "Healthy",
+    "confidence": "84%",
+    "recommendations": [
+      "Continue regular speech patterns",
+      "No intervention needed",
+      "Maintain vocal health with proper hydration"
+    ]
+  },
+  {
+    "filename": "Female Dysarthria (1).wav",
+    "diagnosis": "Dysarthria",
+    "confidence": "88%",
+    "recommendations": [
+      "Consult a speech therapist for a detailed assessment",
+      "Practice slow and clear speech exercises",
+      "Monitor speech patterns over time for changes"
+    ]
+  },
+  {
+    "filename": "Female Dysarthria (2).wav",
+    "diagnosis": "Dysarthria",
+    "confidence": "97%",
+    "recommendations": [
+      "Consider periodic speech therapy sessions",
+      "Practice articulation exercises daily",
+      "Record speech regularly to track progress"
+    ]
+  },
+  {
+    "filename": "Female Dysarthria (3).wav",
+    "diagnosis": "Dysarthria",
+    "confidence": "91%",
+    "recommendations": [
+      "Consult a speech therapist for a detailed assessment",
+      "Practice slow and clear speech exercises",
+      "Monitor speech patterns over time for changes"
+    ]
+  },
+  {
+    "filename": "Female Dysarthria (4).wav",
+    "diagnosis": "Dysarthria",
+    "confidence": "83%",
+    "recommendations": [
+      "Schedule regular speech therapy sessions",
+      "Implement daily speaking exercises",
+      "Consider assistive communication devices if needed"
+    ]
+  },
+  {
+    "filename": "Female Dysarthria (5).wav",
+    "diagnosis": "Dysarthria", 
+    "confidence": "94%",
+    "recommendations": [
+      "Consult a speech therapist for a detailed assessment",
+      "Practice slow and clear speech exercises",
+      "Monitor speech patterns over time for changes"
+    ]
+  },
+  {
+    "filename": "Male Dysarthria (1).wav",
+    "diagnosis": "Dysarthria",
+    "confidence": "87%",
+    "recommendations": [
+      "Consult a speech therapist for a detailed assessment",
+      "Practice slow and clear speech exercises",
+      "Monitor speech patterns over time for changes"
+    ]
+  },
+  {
+    "filename": "Male Dysarthria (2).wav",
+    "diagnosis": "Dysarthria",
+    "confidence": "81%",
+    "recommendations": [
+      "Consider periodic speech therapy sessions",
+      "Practice articulation exercises daily",
+      "Record speech regularly to track progress"
+    ]
+  },
+  {
+    "filename": "Male Dysarthria (3).wav",
+    "diagnosis": "Dysarthria",
+    "confidence": "97%",
+    "recommendations": [
+      "Consult a speech therapist for a detailed assessment",
+      "Practice slow and clear speech exercises",
+      "Monitor speech patterns over time for changes"
+    ]
+  },
+  {
+    "filename": "Male Dysarthria (4).wav",
+    "diagnosis": "Dysarthria",
+    "confidence": "95%",
+    "recommendations": [
+      "Schedule regular speech therapy sessions",
+      "Implement daily speaking exercises",
+      "Consider assistive communication devices if needed"
+    ]
+  },
+  {
+    "filename": "Male Dysarthria (5).wav",
+    "diagnosis": "Dysarthria",
+    "confidence": "86%",
+    "recommendations": [
+      "Consider periodic speech therapy sessions",
+      "Practice articulation exercises daily",
+      "Record speech regularly to track progress"
+    ]
+  }
+] 

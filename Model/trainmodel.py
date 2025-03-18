@@ -34,7 +34,7 @@ def preprocess_data(data):
     le = LabelEncoder()
     data['Gender'] = le.fit_transform(data['Gender'])
 
-    features = data.drop(columns=['Label']).values
+    features = data.select_dtypes(include=[np.number]).drop(columns=['Label']).values
     labels = data['Label'].values
 
     scaler = StandardScaler()
@@ -129,8 +129,8 @@ def evaluate_model(model, X_test, y_test, device):
     print(f"Test Set Accuracy: {accuracy * 100:.2f}%")
 
 if __name__ == "__main__":
-    file_path_dysarthria = r"Compiled Data\FESI DATASET - Dysarthria.csv"
-    file_path_control = r"Compiled Data\FESI DATASET - Control.csv"
+    file_path_dysarthria = r"Data\Compiled Data\FESI DATASET - Dysarthria.csv"
+    file_path_control = r"Data\Compiled Data\FESI DATASET - Control.csv"
 
     data = load_data(file_path_dysarthria, file_path_control)
     features, labels = preprocess_data(data)
