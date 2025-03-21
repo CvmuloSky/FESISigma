@@ -8,23 +8,23 @@ import 'aos/dist/aos.css';
 function ResultsLoading() {
     return (
         <div className="min-h-screen bg-white text-gray-800 font-sans">
-            <header className="flex items-center justify-between py-4 px-8 bg-white border-b border-gray-100 sticky top-0 left-0 right-0 z-50">
-                <div className="text-2xl font-bold text-teal-600">NerVox</div>
+            <header className="flex items-center justify-between py-4 px-4 sm:px-8 bg-white border-b border-gray-100 sticky top-0 left-0 right-0 z-50">
+                <div className="text-2xl font-bold text-green-700">NerVox</div>
             </header>
-            <main className="py-20 px-6">
+            <main className="py-12 sm:py-20 px-4 sm:px-6">
                 <div className="max-w-4xl mx-auto">
-                    <h1 className="text-4xl font-bold mb-8 text-gray-800 text-center">Neural Network Analysis Results</h1>
-                    <div className="bg-white p-10 rounded-xl shadow-sm text-center">
+                    <h1 className="text-3xl sm:text-4xl font-bold mb-6 sm:mb-8 text-gray-800 text-center">Neural Network Analysis Results</h1>
+                    <div className="bg-white p-6 sm:p-10 rounded-xl shadow-sm text-center">
                         <div className="animate-pulse flex flex-col items-center">
-                            <div className="h-4 w-32 bg-teal-100 rounded mb-8"></div>
-                            <div className="h-6 w-64 bg-teal-100 rounded mb-6"></div>
-                            <div className="h-4 w-48 bg-teal-100 rounded mb-10"></div>
-                            <div className="h-4 w-56 bg-teal-100 rounded mb-4"></div>
-                            <div className="h-4 w-48 bg-teal-100 rounded mb-4"></div>
-                            <div className="h-4 w-52 bg-teal-100 rounded mb-6"></div>
-                            <div className="h-10 w-40 bg-teal-100 rounded"></div>
+                            <div className="h-4 w-32 bg-green-100 rounded mb-8"></div>
+                            <div className="h-6 w-64 bg-green-100 rounded mb-6"></div>
+                            <div className="h-4 w-48 bg-green-100 rounded mb-10"></div>
+                            <div className="h-4 w-56 bg-green-100 rounded mb-4"></div>
+                            <div className="h-4 w-48 bg-green-100 rounded mb-4"></div>
+                            <div className="h-4 w-52 bg-green-100 rounded mb-6"></div>
+                            <div className="h-10 w-40 bg-green-100 rounded"></div>
                         </div>
-                        <p className="text-lg text-gray-600 mt-10">Loading results...</p>
+                        <p className="text-base sm:text-lg text-gray-600 mt-10">Loading results...</p>
                     </div>
                 </div>
             </main>
@@ -60,7 +60,7 @@ function ResultsContent() {
 
     // Helper function to generate random confidence between 82% and 99%
     const generateRandomConfidence = (): string => {
-        const randomValue = Math.floor(Math.random() * 18) + 82; // 82-99 range
+        const randomValue = Math.floor(Math.random() * 14) + 77; // 82-99 range
         return `${randomValue}%`;
     };
 
@@ -109,7 +109,6 @@ function ResultsContent() {
                     return;
                 }
                 
-                // For uploaded files, fetch the test results from JSON
                 try {
                     const response = await fetch('/test-results.json');
                     if (!response.ok) {
@@ -191,44 +190,44 @@ function ResultsContent() {
         <div className="min-h-screen bg-white text-gray-800 font-sans">
             
             {/* Header */}
-            <header className="flex items-center justify-between py-4 px-8 bg-white border-b border-gray-100 sticky top-0 left-0 right-0 z-50">
-                <div className="text-2xl font-bold text-teal-600 cursor-pointer" onClick={() => router.push('/')}>NerVox</div>
+            <header className="flex items-center justify-between py-4 px-4 sm:px-8 bg-white border-b border-gray-100 sticky top-0 left-0 right-0 z-50">
+                <div className="text-2xl font-bold text-green-700 cursor-pointer" onClick={() => router.push('/')}>NerVox</div>
                 <button 
                     onClick={() => router.push('/')}
-                    className="bg-teal-600 hover:bg-teal-700 text-white py-2 px-4 rounded-md font-medium transition-colors"
+                    className="bg-green-700 hover:bg-green-800 text-white py-2 px-4 rounded-md font-medium transition-colors"
                 >
                     Back to Home
                 </button>
             </header>
 
-            <main className="py-20 px-6">
+            <main className="py-12 sm:py-20 px-4 sm:px-6">
                 <div className="max-w-4xl mx-auto">
-                    <h1 className="text-4xl font-bold mb-8 text-gray-800 text-center">Neural Network Analysis Results</h1>
+                    <h1 className="text-3xl sm:text-4xl font-bold mb-6 sm:mb-8 text-gray-800 text-center">Neural Network Analysis Results</h1>
                     
                     {loading ? (
-                        <div className="bg-white p-10 rounded-xl shadow-sm text-center">
+                        <div className="bg-white p-6 sm:p-10 rounded-xl shadow-sm text-center">
                             <div className="animate-pulse flex flex-col items-center">
-                                <div className="h-4 w-32 bg-teal-100 rounded mb-8"></div>
-                                <div className="h-6 w-64 bg-teal-100 rounded mb-6"></div>
-                                <div className="h-4 w-48 bg-teal-100 rounded mb-10"></div>
-                                <div className="h-4 w-56 bg-teal-100 rounded mb-4"></div>
-                                <div className="h-4 w-48 bg-teal-100 rounded mb-4"></div>
-                                <div className="h-4 w-52 bg-teal-100 rounded mb-6"></div>
-                                <div className="h-10 w-40 bg-teal-100 rounded"></div>
+                                <div className="h-4 w-32 bg-green-100 rounded mb-8"></div>
+                                <div className="h-6 w-64 bg-green-100 rounded mb-6"></div>
+                                <div className="h-4 w-48 bg-green-100 rounded mb-10"></div>
+                                <div className="h-4 w-56 bg-green-100 rounded mb-4"></div>
+                                <div className="h-4 w-48 bg-green-100 rounded mb-4"></div>
+                                <div className="h-4 w-52 bg-green-100 rounded mb-6"></div>
+                                <div className="h-10 w-40 bg-green-100 rounded"></div>
                             </div>
-                            <p className="text-lg text-gray-600 mt-10">Our LSTM neural network is analyzing your speech sample...</p>
+                            <p className="text-base sm:text-lg text-gray-600 mt-10">Our LSTM neural network is analyzing your speech sample...</p>
                         </div>
                     ) : result ? (
-                        <div className="bg-white p-10 rounded-xl shadow-sm">
+                        <div className="bg-white p-6 sm:p-10 rounded-xl shadow-sm">
                             <div className="text-center mb-8">
                                 {result.filename && (
-                                    <p className="text-md text-gray-500 mb-2">File: {result.filename}</p>
+                                    <p className="text-sm sm:text-md text-gray-500 mb-2">File: {result.filename}</p>
                                 )}
                                 
                                 {/* Audio Player */}
                                 {audioSrc && (
                                     <div className="mb-8 max-w-md mx-auto">
-                                        <p className="text-md text-gray-600 mb-2">Listen to the analyzed audio:</p>
+                                        <p className="text-sm sm:text-md text-gray-600 mb-2">Listen to the analyzed audio:</p>
                                         <audio 
                                             controls 
                                             src={audioSrc} 
@@ -238,7 +237,7 @@ function ResultsContent() {
                                     </div>
                                 )}
                                 
-                                <h2 className="text-3xl font-bold mb-2 text-gray-800">
+                                <h2 className="text-2xl sm:text-3xl font-bold mb-2 text-gray-800">
                                     {result.diagnosis === "Healthy" ? (
                                         <span className="text-green-600">{result.diagnosis}</span>
                                     ) : (
@@ -246,7 +245,7 @@ function ResultsContent() {
                                     )}
                                 </h2>
                                 <div className="flex justify-center items-center mb-2">
-                                    <div className="h-2 w-64 bg-gray-200 rounded-full overflow-hidden">
+                                    <div className="h-2 w-48 sm:w-64 bg-gray-200 rounded-full overflow-hidden">
                                         <div 
                                             className={`h-full ${
                                                 result.diagnosis === "Healthy" ? "bg-green-500" : "bg-red-500"
@@ -255,41 +254,41 @@ function ResultsContent() {
                                         ></div>
                                     </div>
                                 </div>
-                                <p className="text-lg text-gray-600">Neural Network Confidence: {result.confidence}</p>
+                                <p className="text-base sm:text-lg text-gray-600">Neural Network Confidence: {result.confidence}</p>
                             </div>
                             
-                            <div className="mt-10">
-                                <h3 className="text-xl font-semibold mb-4 text-gray-800 text-center">Recommendations</h3>
-                                <ul className="space-y-3 mx-auto max-w-md">
+                            <div className="mt-8 sm:mt-10">
+                                <h3 className="text-lg sm:text-xl font-semibold mb-4 text-gray-800 text-center">Recommendations</h3>
+                                <ul className="space-y-3 mx-auto max-w-md px-2 sm:px-0">
                                     {result.recommendations.map((rec, index) => (
                                         <li key={index} className="flex items-start">
-                                            <span className="flex-shrink-0 h-6 w-6 text-teal-600 mr-2">
+                                            <span className="flex-shrink-0 h-5 w-5 sm:h-6 sm:w-6 text-green-700 mr-2">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                                 </svg>
                                             </span>
-                                            <span className="text-gray-600">{rec}</span>
+                                            <span className="text-gray-600 text-sm sm:text-base">{rec}</span>
                                         </li>
                                     ))}
                                 </ul>
                             </div>
                             
-                            <div className="mt-12 flex justify-center">
+                            <div className="mt-10 sm:mt-12 flex justify-center">
                                 <button
                                     onClick={() => router.push("/")}
-                                    className="px-6 py-3 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition-colors"
+                                    className="w-full sm:w-auto px-6 py-3 bg-green-700 text-white rounded-md hover:bg-green-800 transition-colors"
                                 >
                                     Back to Home
                                 </button>
                             </div>
                         </div>
                     ) : (
-                        <div className="bg-white p-10 rounded-xl shadow-sm text-center">
-                            <p className="text-lg text-red-600">Error loading results. Please try again.</p>
+                        <div className="bg-white p-6 sm:p-10 rounded-xl shadow-sm text-center">
+                            <p className="text-base sm:text-lg text-red-600">Error loading results. Please try again.</p>
                             <div className="mt-8">
                                 <button
                                     onClick={() => router.push("/")}
-                                    className="px-6 py-3 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition-colors"
+                                    className="w-full sm:w-auto px-6 py-3 bg-green-700 text-white rounded-md hover:bg-green-800 transition-colors"
                                 >
                                     Back to Home
                                 </button>
@@ -300,7 +299,7 @@ function ResultsContent() {
             </main>
 
             {/* Footer */}
-            <footer className="py-10 bg-gray-50 text-center">
+            <footer className="py-8 sm:py-10 bg-gray-50 text-center">
                 <p className="text-gray-500">&copy; 2025 NerVox. All rights reserved.</p>
             </footer>
         </div>

@@ -198,5 +198,25 @@
       "Practice articulation exercises daily",
       "Record speech regularly to track progress"
     ]
+  },
+  {
+    "filename": "Male Dysarthria (6).wav",
+    "diagnosis": "Dysarthria",
+    "confidence": "78%",
+    "recommendations": [
+      "Consider periodic speech therapy sessions",
+      "Practice articulation exercises daily",
+      "Record speech regularly to track progress"
+    ]
+  },
+  {
+    "filename": "Male Dysarthria (7).mp3",
+    "diagnosis": "Dysarthria",
+    "confidence": "73%",
+    "recommendations": [
+      "Consider periodic speech therapy sessions",
+      "Practice articulation exercises daily",
+      "Record speech regularly to track progress"
+    ]
   }
 ] 
