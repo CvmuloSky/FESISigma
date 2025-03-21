@@ -17,13 +17,32 @@ export default function Home() {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const recordedChunksRef = useRef<Blob[]>([]);
   const [recordingError, setRecordingError] = useState<string | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [uploadedFileUrl, setUploadedFileUrl] = useState<string | null>(null);
+
+  // Add cleanup effect to revoke object URLs
+  useEffect(() => {
+    // Cleanup function to revoke object URLs when component unmounts
+    return () => {
+      if (recordingUrl) {
+        URL.revokeObjectURL(recordingUrl);
+      }
+      if (uploadedFileUrl) {
+        URL.revokeObjectURL(uploadedFileUrl);
+      }
+    };
+  }, [recordingUrl, uploadedFileUrl]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
       const selectedFile = event.target.files[0];
       setFile(selectedFile);
+      
+      const fileUrl = URL.createObjectURL(selectedFile);
+      setUploadedFileUrl(fileUrl);
     }
   };
+
 
   const checkMicrophonePermission = async (): Promise<boolean> => {
     try {
@@ -131,9 +150,8 @@ export default function Home() {
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (file) {
-      const fileUrl = URL.createObjectURL(file);
-      router.push(`/results?file=${encodeURIComponent(file.name)}&fileUrl=${encodeURIComponent(fileUrl)}`);
+    if (file && uploadedFileUrl) {
+      router.push(`/results?file=${encodeURIComponent(file.name)}&fileUrl=${encodeURIComponent(uploadedFileUrl)}`);
     }
   };
 
@@ -149,49 +167,135 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-white text-gray-800 font-sans">
-      {/* Header */}
-      <header className="flex items-center justify-between py-4 px-8 bg-white border-b border-gray-100 sticky top-0 left-0 right-0 z-50">
-        <div className="text-2xl font-bold text-teal-600">NerVox</div>
-        <nav>
+      {/* Header with Mobile Support */}
+      <header className="flex items-center justify-between py-4 px-4 sm:px-8 bg-white border-b border-gray-100 sticky top-0 left-0 right-0 z-50">
+        <div className="text-2xl font-bold text-green-700">NerVox</div>
+        
+        {/* Mobile menu button */}
+        <button 
+          className="md:hidden flex items-center text-gray-700"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            {mobileMenuOpen ? (
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            ) : (
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            )}
+          </svg>
+        </button>
+        
+        {/* Desktop Navigation */}
+        <nav className="hidden md:block">
           <ul className="flex space-x-8">
             <li>
-              <a href="#hero" className="text-gray-700 hover:text-teal-600 font-medium">Home</a>
+              <a href="#hero" className="text-gray-700 hover:text-green-700 font-medium">Home</a>
             </li>
             <li>
-              <a href="#solutions" className="text-gray-700 hover:text-teal-600 font-medium">Solutions</a>
+              <a href="#solutions" className="text-gray-700 hover:text-green-700 font-medium">Solutions</a>
             </li>
             <li>
-              <a href="#case-studies" className="text-gray-700 hover:text-teal-600 font-medium">Case Studies</a>
+              <a href="#case-studies" className="text-gray-700 hover:text-green-700 font-medium">Case Studies</a>
             </li>
             <li>
-              <a href="#contact" className="text-gray-700 hover:text-teal-600 font-medium">Our Team</a>
+              <a href="#contact" className="text-gray-700 hover:text-green-700 font-medium">Our Team</a>
             </li>
             <li>
-              <a href="#contact" className="text-gray-700 hover:text-teal-600 font-medium">Contact</a>
+              <a href="#contact" className="text-gray-700 hover:text-green-700 font-medium">Contact</a>
             </li>
           </ul>
         </nav>
-        <button className="bg-teal-600 hover:bg-teal-700 text-white py-2 px-4 rounded-md font-medium transition-colors">
+        
+        {/* Desktop CTA Button */}
+        <a 
+          href="#upload" 
+          className="hidden md:block bg-green-700 hover:bg-green-800 text-white py-2 px-4 rounded-md font-medium transition-colors"
+        >
           Try Neural Network
-        </button>
+        </a>
       </header>
 
-      {/* Hero Section */}
+      {/* Mobile Navigation Menu */}
+      {mobileMenuOpen && (
+        <div className="md:hidden bg-white py-4 px-6 shadow-md fixed z-40 w-full">
+          <nav>
+            <ul className="flex flex-col space-y-4">
+              <li>
+                <a 
+                  href="#hero" 
+                  className="text-gray-700 hover:text-green-700 font-medium block py-2"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Home
+                </a>
+              </li>
+              <li>
+                <a 
+                  href="#solutions" 
+                  className="text-gray-700 hover:text-green-700 font-medium block py-2"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Solutions
+                </a>
+              </li>
+              <li>
+                <a 
+                  href="#case-studies" 
+                  className="text-gray-700 hover:text-green-700 font-medium block py-2"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Case Studies
+                </a>
+              </li>
+              <li>
+                <a 
+                  href="#contact" 
+                  className="text-gray-700 hover:text-green-700 font-medium block py-2"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Our Team
+                </a>
+              </li>
+              <li>
+                <a 
+                  href="#contact" 
+                  className="text-gray-700 hover:text-green-700 font-medium block py-2"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Contact
+                </a>
+              </li>
+              <li>
+                <a 
+                  href="#upload"
+                  className="bg-green-700 hover:bg-green-800 text-white py-2 px-4 rounded-md font-medium transition-colors block text-center"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Try Neural Network
+                </a>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      )}
+
+      {/* Hero Section - updated for mobile */}
       <section
         id="hero"
-        className="py-24 px-6 bg-gradient-to-b from-white to-teal-50"
+        className="py-16 md:py-24 px-4 md:px-6 bg-gradient-to-b from-white to-green-50"
       >
         <div className="max-w-6xl mx-auto text-center" data-aos="fade-up">
-          <h1 className="text-5xl sm:text-6xl font-bold mb-6 text-gray-800 leading-tight">
-            Your Voice is the Gateway<br />to Untapped Knowledge.
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 text-gray-800 leading-tight">
+            Your Voice is the Gateway<br className="hidden sm:block" />to Untapped Knowledge.
           </h1>
-          <p className="text-xl max-w-2xl mx-auto mb-10 text-gray-600">
+          <p className="text-lg md:text-xl max-w-2xl mx-auto mb-10 text-gray-600">
             Creating Scalable, Hardware-Free Voice Analysis Using Advanced LSTM Neural Networks For Research and Industry.
           </p>
-          <div className="flex justify-center space-x-4">
+          <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
             <a
               href="#upload"
-              className="px-8 py-3 bg-teal-600 text-white rounded-md text-lg hover:bg-teal-700 transition-colors"
+              className="px-8 py-3 bg-green-700 text-white rounded-md text-lg hover:bg-green-800 transition-colors"
               data-aos="fade-up"
               data-aos-delay="200"
             >
@@ -199,7 +303,7 @@ export default function Home() {
             </a>
             <a
               href="#about"
-              className="px-8 py-3 border border-teal-600 text-teal-600 rounded-md text-lg hover:bg-teal-50 transition-colors"
+              className="px-8 py-3 border border-green-700 text-green-700 rounded-md text-lg hover:bg-green-50 transition-colors"
               data-aos="fade-up"
               data-aos-delay="300"
             >
@@ -210,34 +314,34 @@ export default function Home() {
       </section>
 
       {/* About Section */}
-      <section id="about" className="py-20 px-6 bg-white" data-aos="fade-up">
+      <section id="about" className="py-16 md:py-20 px-4 md:px-6 bg-white" data-aos="fade-up">
         <div className="max-w-4xl mx-auto text-center mb-12">
-          <h2 className="text-4xl font-bold mb-6 text-gray-800">About</h2>
-          <p className="text-lg text-gray-600">
+          <h2 className="text-3xl md:text-4xl font-bold mb-6 text-gray-800">About</h2>
+          <p className="text-base md:text-lg text-gray-600">
             We&apos;ve developed the first <span className="font-semibold">accurate</span> and <span className="font-semibold">scalable</span> voice analysis system using multi-head attention LSTM neural networks. It&apos;s now publicly available, and we&apos;ve applied it ourselves to build software for brain health assessment, neurology research, and mental wellness monitoring.
           </p>
         </div>
       </section>
 
       {/* Solutions Section */}
-      <section id="solutions" className="py-20 px-6 bg-gray-50" data-aos="fade-up">
+      <section id="solutions" className="py-16 md:py-20 px-4 md:px-6 bg-gray-50" data-aos="fade-up">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold mb-12 text-gray-800 text-center">Our Solutions</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="p-8 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow" data-aos="fade-up" data-aos-delay="100">
-              <h3 className="text-2xl font-semibold mb-4 text-teal-600">Real-Time Voice Analysis</h3>
+          <h2 className="text-3xl md:text-4xl font-bold mb-8 md:mb-12 text-gray-800 text-center">Our Solutions</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+            <div className="p-6 md:p-8 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow" data-aos="fade-up" data-aos-delay="100">
+              <h3 className="text-xl md:text-2xl font-semibold mb-4 text-green-700">Real-Time Voice Analysis</h3>
               <p className="text-gray-600">
                 Our neural network continuously monitors speech patterns to detect anomalies indicative of neurological conditions.
               </p>
             </div>
-            <div className="p-8 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow" data-aos="fade-up" data-aos-delay="200">
-              <h3 className="text-2xl font-semibold mb-4 text-teal-600">Non-Invasive Diagnostics</h3>
+            <div className="p-6 md:p-8 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow" data-aos="fade-up" data-aos-delay="200">
+              <h3 className="text-xl md:text-2xl font-semibold mb-4 text-green-700">Non-Invasive Diagnostics</h3>
               <p className="text-gray-600">
                 Use a standard laptop microphone with our AI for hassle-free, on-the-go assessments.
               </p>
             </div>
-            <div className="p-8 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow" data-aos="fade-up" data-aos-delay="300">
-              <h3 className="text-2xl font-semibold mb-4 text-teal-600">Actionable Reports</h3>
+            <div className="p-6 md:p-8 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow" data-aos="fade-up" data-aos-delay="300">
+              <h3 className="text-xl md:text-2xl font-semibold mb-4 text-green-700">Actionable Reports</h3>
               <p className="text-gray-600">
                 Our LSTM model generates detailed insights and metrics to help clinicians tailor treatment plans.
               </p>
@@ -247,20 +351,20 @@ export default function Home() {
       </section>
 
       {/* Case Studies Section */}
-      <section id="case-studies" className="py-20 px-6 bg-white" data-aos="fade-up">
+      <section id="case-studies" className="py-16 md:py-20 px-4 md:px-6 bg-white" data-aos="fade-up">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold mb-12 text-gray-800 text-center">Case Studies</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-            <div className="bg-gray-50 p-8 rounded-xl" data-aos="fade-up" data-aos-delay="100">
-              <h3 className="text-2xl font-semibold mb-4 text-teal-600">
+          <h2 className="text-3xl md:text-4xl font-bold mb-8 md:mb-12 text-gray-800 text-center">Case Studies</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
+            <div className="bg-gray-50 p-6 md:p-8 rounded-xl" data-aos="fade-up" data-aos-delay="100">
+              <h3 className="text-xl md:text-2xl font-semibold mb-4 text-green-700">
                 Early Detection in Clinical Trials
               </h3>
               <p className="text-gray-600">
                 Our solution was implemented in clinical trials, accurately identifying early speech anomalies in patients, leading to timely interventions.
               </p>
             </div>
-            <div className="bg-gray-50 p-8 rounded-xl" data-aos="fade-up" data-aos-delay="200">
-              <h3 className="text-2xl font-semibold mb-4 text-teal-600">
+            <div className="bg-gray-50 p-6 md:p-8 rounded-xl" data-aos="fade-up" data-aos-delay="200">
+              <h3 className="text-xl md:text-2xl font-semibold mb-4 text-green-700">
                 Enhancing Telehealth Diagnostics
               </h3>
               <p className="text-gray-600">
@@ -272,39 +376,53 @@ export default function Home() {
       </section>
 
       {/* File Upload / Record Section */}
-      <section id="upload" className="py-20 px-6 bg-teal-50" data-aos="fade-up">
+      <section id="upload" className="py-16 md:py-20 px-4 md:px-6 bg-green-50" data-aos="fade-up">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl font-bold mb-6 text-gray-800">Submit Your Speech Sample</h2>
-          <p className="text-lg mb-8 text-gray-600">
+          <h2 className="text-3xl md:text-4xl font-bold mb-6 text-gray-800">Submit Your Speech Sample</h2>
+          <p className="text-base md:text-lg mb-8 text-gray-600">
             Choose to record on the spot or upload a file for AI-powered neurological analysis.
           </p>
           {/* Toggle buttons */}
           <div className="inline-flex p-1 mb-8 bg-gray-100 rounded-lg">
             <button
-              className={`px-6 py-3 rounded-md font-medium ${mode === 'upload' ? 'bg-teal-600 text-white' : 'text-gray-600 hover:bg-gray-200'} transition-colors`}
+              className={`px-4 sm:px-6 py-2 sm:py-3 rounded-md font-medium ${mode === 'upload' ? 'bg-green-700 text-white' : 'text-gray-600 hover:bg-gray-200'} transition-colors`}
               onClick={() => setMode('upload')}
             >
               Upload File
             </button>
             <button
-              className={`px-6 py-3 rounded-md font-medium ${mode === 'record' ? 'bg-teal-600 text-white' : 'text-gray-600 hover:bg-gray-200'} transition-colors`}
+              className={`px-4 sm:px-6 py-2 sm:py-3 rounded-md font-medium ${mode === 'record' ? 'bg-green-700 text-white' : 'text-gray-600 hover:bg-gray-200'} transition-colors`}
               onClick={() => setMode('record')}
             >
               Record Audio
             </button>
           </div>
 
-          <div className="bg-white p-8 rounded-xl shadow-sm">
+          <div className="bg-white p-6 md:p-8 rounded-xl shadow-sm">
             {mode === 'upload' ? (
               // File upload form
               <form onSubmit={handleSubmit} className="flex flex-col items-center">
-                <input
-                  type="file"
-                  accept="audio/*"
-                  onChange={handleFileChange}
-                  className="mb-6 p-3 border border-gray-200 rounded-lg w-full max-w-md"
-                />
-                <button type="submit" className="px-8 py-3 bg-teal-600 text-white rounded-md text-lg hover:bg-teal-700 transition-colors">
+                {!uploadedFileUrl ? (
+                  // Show file input only when no file is selected
+                  <input
+                    type="file"
+                    accept="audio/*"
+                    onChange={handleFileChange}
+                    className="mb-6 p-3 border border-gray-200 rounded-lg w-full max-w-md"
+                  />
+                ) : (
+                  // Show audio preview when file is selected
+                  <div className="w-full max-w-md mb-6">
+                    <p className="text-md text-gray-600 mb-2">Preview your audio:</p>
+                    <audio controls src={uploadedFileUrl} className="w-full mb-4"></audio>
+                  </div>
+                )}
+                
+                <button 
+                  type="submit" 
+                  className="px-6 sm:px-8 py-3 bg-green-700 text-white rounded-md text-lg hover:bg-green-800 transition-colors w-full sm:w-auto max-w-xs"
+                  disabled={!file}
+                >
                   Submit for Analysis
                 </button>
               </form>
@@ -321,7 +439,7 @@ export default function Home() {
                 {!isRecording && !recordingUrl && (
                   <button
                     onClick={startRecording}
-                    className="px-8 py-3 bg-teal-600 text-white rounded-md text-lg hover:bg-teal-700 transition-colors"
+                    className="px-6 sm:px-8 py-3 bg-green-700 text-white rounded-md text-lg hover:bg-green-800 transition-colors w-full sm:w-auto max-w-xs"
                   >
                     Start Recording
                   </button>
@@ -329,7 +447,7 @@ export default function Home() {
                 {isRecording && (
                   <button
                     onClick={stopRecording}
-                    className="px-8 py-3 bg-red-500 text-white rounded-md text-lg hover:bg-red-600 transition-colors"
+                    className="px-6 sm:px-8 py-3 bg-red-500 text-white rounded-md text-lg hover:bg-red-600 transition-colors w-full sm:w-auto max-w-xs"
                   >
                     Stop Recording
                   </button>
@@ -337,7 +455,7 @@ export default function Home() {
                 {recordingUrl && (
                   <div className="w-full max-w-md">
                     <audio controls src={recordingUrl} className="w-full mb-6"></audio>
-                    <div className="flex justify-center space-x-4">
+                    <div className="flex flex-col sm:flex-row justify-center space-y-3 sm:space-y-0 sm:space-x-4">
                       <button
                         onClick={resetRecording}
                         className="px-5 py-2 border border-gray-300 text-gray-600 rounded-md hover:bg-gray-50 transition-colors"
@@ -346,7 +464,7 @@ export default function Home() {
                       </button>
                       <button
                         onClick={submitFile}
-                        className="px-6 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition-colors"
+                        className="px-6 py-2 bg-green-700 text-white rounded-md hover:bg-green-800 transition-colors"
                       >
                         Submit for Analysis
                       </button>
@@ -360,15 +478,15 @@ export default function Home() {
       </section>
 
       {/* Contact Section */}
-      <section id="contact" className="py-20 px-6 bg-white" data-aos="fade-up">
+      <section id="contact" className="py-16 md:py-20 px-4 md:px-6 bg-white" data-aos="fade-up">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl font-bold mb-6 text-gray-800">Get in Touch</h2>
-          <p className="text-lg mb-8 text-gray-600">
+          <h2 className="text-3xl md:text-4xl font-bold mb-6 text-gray-800">Get in Touch</h2>
+          <p className="text-base md:text-lg mb-8 text-gray-600">
             Interested in learning more about our innovative diagnostic solutions? Contact us today to schedule a demo or consult with our experts.
           </p>
           <a
             href="mailto:contact@nervox.ai"
-            className="inline-block px-8 py-3 bg-teal-600 text-white rounded-md text-lg hover:bg-teal-700 transition-colors"
+            className="inline-block px-6 sm:px-8 py-3 bg-green-700 text-white rounded-md text-lg hover:bg-green-800 transition-colors"
           >
             Contact Us
           </a>
@@ -376,15 +494,15 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="py-10 bg-gray-50 text-center">
+      <footer className="py-8 md:py-10 bg-gray-50 text-center px-4">
         <div className="flex justify-center space-x-6 mb-4">
-          <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-teal-600">
+          <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-green-700">
             <i className="fab fa-linkedin text-xl"></i>
           </a>
-          <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-teal-600">
+          <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-green-700">
             <i className="fab fa-github text-xl"></i>
           </a>
-          <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-teal-600">
+          <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-green-700">
             <i className="fab fa-twitter text-xl"></i>
           </a>
         </div>

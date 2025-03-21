@@ -6,7 +6,7 @@ body {
   background-color: #1a202c;
   color: white;
   font-family: sans-serif;
-  margin: 0; /* Ensure no default margin */
+  margin: 0;
 }
 
 header {
@@ -17,15 +17,18 @@ header {
   right: 0;
   z-index: 50;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  padding: 1rem; /* Consistent padding */
+  padding: 1rem;
 }
 
 /* Navigation */
+nav {
+  transition: all 0.3s ease; /* Smooth transition for collapse/expand */
+}
+
 nav ul {
   display: flex;
-  flex-wrap: wrap; /* Allow items to wrap on small screens */
-  gap: 1rem; /* Consistent spacing */
-  justify-content: center; /* Center items on mobile */
+  flex-direction: column; /* Default to column for mobile */
+  gap: 1rem;
   padding: 0;
   margin: 0;
   list-style: none;
@@ -34,7 +37,7 @@ nav ul {
 nav ul li a {
   color: white;
   transition: color 0.3s;
-  font-size: 1rem; /* Base font size */
+  font-size: 1rem;
 }
 
 nav ul li a:hover {
@@ -42,37 +45,37 @@ nav ul li a:hover {
 }
 
 section {
-  padding: 4rem 1rem; /* Reduced padding for mobile */
+  padding: 4rem 1rem;
 }
 
 /* Headings */
 h1 {
-  font-size: 2rem; /* Smaller base size for mobile */
+  font-size: 2rem;
   font-weight: 800;
   color: #60a5fa;
   margin-bottom: 1rem;
-  line-height: 1.2; /* Improved readability */
+  line-height: 1.2;
 }
 
 h2 {
-  font-size: 1.5rem; /* Smaller base size for mobile */
+  font-size: 1.5rem;
   font-weight: 700;
   color: #60a5fa;
   margin-bottom: 1.5rem;
 }
 
 p {
-  font-size: 1rem; /* Adjusted for mobile */
+  font-size: 1rem;
   color: #d1d5db;
-  line-height: 1.5; /* Improved readability */
+  line-height: 1.5;
 }
 
 /* Buttons */
 button {
-  padding: 0.75rem 1.5rem; /* Slightly smaller padding */
-  background-color: #2563eb;
+  padding: 0.75rem 1.5rem;
+  background-color: #25eb88;
   border-radius: 8px;
-  font-size: 1rem; /* Adjusted for mobile */
+  font-size: 1rem;
   transition: background-color 0.3s;
   color: white;
   border: none;
@@ -80,22 +83,21 @@ button {
 }
 
 button:hover {
-  background-color: #1e40af;
+  background-color: #25eb35;
 }
 
-/* File Input */
 input[type="file"] {
-  background-color: #1f2937;
+  background-color: #58a07c;
   padding: 0.5rem;
   border-radius: 8px;
   color: white;
-  border: 1px solid #374151;
-  width: 100%; /* Full width on mobile */
-  box-sizing: border-box; /* Include padding/border in width */
+  border: 1px solid #368f62;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 input[type="file"]::file-selector-button {
-  background-color: #2563eb;
+  background-color: #25eb88;
   border: none;
   color: white;
   padding: 0.5rem 1rem;
@@ -104,64 +106,44 @@ input[type="file"]::file-selector-button {
 }
 
 /* Mobile-specific adjustments */
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   header {
-    padding: 0.75rem; /* Reduced padding */
+    padding: 0.75rem;
+  }
+
+  nav {
+    width: 100%;
   }
 
   nav ul {
-    flex-direction: column; /* Stack nav items vertically */
     align-items: center;
   }
 
   nav ul li a {
-    font-size: 0.9rem; /* Slightly smaller text */
+    font-size: 1.1rem; /* Slightly larger for readability */
   }
 
-  h1 {
-    font-size: 1.75rem; /* Further reduced for small screens */
+  .md\:hidden {
+    display: block; /* Show hamburger on mobile */
   }
 
-  h2 {
-    font-size: 1.25rem;
-  }
-
-  section {
-    padding: 2rem 0.75rem; /* Further reduced padding */
-  }
-
-  button {
-    padding: 0.5rem 1rem; /* Smaller buttons */
-    font-size: 0.9rem;
-  }
-
-  .grid {
-    grid-template-columns: 1fr; /* Single column on mobile */
-  }
-
-  .flex {
-    flex-direction: column; /* Stack flex items vertically */
-    gap: 1rem; /* Consistent spacing */
-  }
-
-  .max-w-6xl, .max-w-4xl {
-    max-width: 100%; /* Full width on mobile */
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
+  .md\:block {
+    display: none; /* Hide desktop button on mobile */
   }
 }
 
-/* Larger screens */
+/* Desktop adjustments */
 @media (min-width: 768px) {
+  nav ul {
+    flex-direction: row; /* Horizontal for desktop */
+    justify-content: flex-end;
+  }
+
   h1 {
-    font-size: 3rem; /* Restore original size */
+    font-size: 3rem;
   }
 
   h2 {
     font-size: 2rem;
-  }
-
-  nav ul {
-    flex-direction: row; /* Horizontal nav on larger screens */
   }
 }
