@@ -2,20 +2,166 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #a6ddff;
-  --foreground: #31a9ea;
+body {
+  background-color: #1a202c;
+  color: white;
+  font-family: sans-serif;
+  margin: 0; /* Ensure no default margin */
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #a6ddff;
-    --foreground: #31a9ea;
+header {
+  background-color: rgba(0, 0, 0, 0.8);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 1rem; /* Consistent padding */
+}
+
+/* Navigation */
+nav ul {
+  display: flex;
+  flex-wrap: wrap; /* Allow items to wrap on small screens */
+  gap: 1rem; /* Consistent spacing */
+  justify-content: center; /* Center items on mobile */
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+nav ul li a {
+  color: white;
+  transition: color 0.3s;
+  font-size: 1rem; /* Base font size */
+}
+
+nav ul li a:hover {
+  color: #60a5fa;
+}
+
+section {
+  padding: 4rem 1rem; /* Reduced padding for mobile */
+}
+
+/* Headings */
+h1 {
+  font-size: 2rem; /* Smaller base size for mobile */
+  font-weight: 800;
+  color: #60a5fa;
+  margin-bottom: 1rem;
+  line-height: 1.2; /* Improved readability */
+}
+
+h2 {
+  font-size: 1.5rem; /* Smaller base size for mobile */
+  font-weight: 700;
+  color: #60a5fa;
+  margin-bottom: 1.5rem;
+}
+
+p {
+  font-size: 1rem; /* Adjusted for mobile */
+  color: #d1d5db;
+  line-height: 1.5; /* Improved readability */
+}
+
+/* Buttons */
+button {
+  padding: 0.75rem 1.5rem; /* Slightly smaller padding */
+  background-color: #2563eb;
+  border-radius: 8px;
+  font-size: 1rem; /* Adjusted for mobile */
+  transition: background-color 0.3s;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #1e40af;
+}
+
+/* File Input */
+input[type="file"] {
+  background-color: #1f2937;
+  padding: 0.5rem;
+  border-radius: 8px;
+  color: white;
+  border: 1px solid #374151;
+  width: 100%; /* Full width on mobile */
+  box-sizing: border-box; /* Include padding/border in width */
+}
+
+input[type="file"]::file-selector-button {
+  background-color: #2563eb;
+  border: none;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* Mobile-specific adjustments */
+@media (max-width: 640px) {
+  header {
+    padding: 0.75rem; /* Reduced padding */
+  }
+
+  nav ul {
+    flex-direction: column; /* Stack nav items vertically */
+    align-items: center;
+  }
+
+  nav ul li a {
+    font-size: 0.9rem; /* Slightly smaller text */
+  }
+
+  h1 {
+    font-size: 1.75rem; /* Further reduced for small screens */
+  }
+
+  h2 {
+    font-size: 1.25rem;
+  }
+
+  section {
+    padding: 2rem 0.75rem; /* Further reduced padding */
+  }
+
+  button {
+    padding: 0.5rem 1rem; /* Smaller buttons */
+    font-size: 0.9rem;
+  }
+
+  .grid {
+    grid-template-columns: 1fr; /* Single column on mobile */
+  }
+
+  .flex {
+    flex-direction: column; /* Stack flex items vertically */
+    gap: 1rem; /* Consistent spacing */
+  }
+
+  .max-w-6xl, .max-w-4xl {
+    max-width: 100%; /* Full width on mobile */
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
   }
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+/* Larger screens */
+@media (min-width: 768px) {
+  h1 {
+    font-size: 3rem; /* Restore original size */
+  }
+
+  h2 {
+    font-size: 2rem;
+  }
+
+  nav ul {
+    flex-direction: row; /* Horizontal nav on larger screens */
+  }
 }
