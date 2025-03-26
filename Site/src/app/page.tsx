@@ -1,14 +1,13 @@
 "use client";
 import React, { useEffect, useState, useRef } from 'react';
-import 'aos/dist/aos.css';
-import AOS from 'aos';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { Mic, Upload, FileAudio, ExternalLink } from 'lucide-react';
+import { AudioVisualizer } from '@/components/audio-visualizer';
+import { ParticleEffect } from '@/components/particle-effect';
 
 export default function Home() {
-  useEffect(() => {
-    AOS.init({ duration: 1000 });
-  }, []);
-
   const router = useRouter();
   const [file, setFile] = useState<File | null>(null);
   const [mode, setMode] = useState<'upload' | 'record'>('upload');
@@ -17,12 +16,13 @@ export default function Home() {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const recordedChunksRef = useRef<Blob[]>([]);
   const [recordingError, setRecordingError] = useState<string | null>(null);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [uploadedFileUrl, setUploadedFileUrl] = useState<string | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
+  const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
 
   // Add cleanup effect to revoke object URLs
   useEffect(() => {
-    // Cleanup function to revoke object URLs when component unmounts
     return () => {
       if (recordingUrl) {
         URL.revokeObjectURL(recordingUrl);
@@ -30,31 +30,34 @@ export default function Home() {
       if (uploadedFileUrl) {
         URL.revokeObjectURL(uploadedFileUrl);
       }
+      if (audioContext) {
+        audioContext.close();
+      }
     };
-  }, [recordingUrl, uploadedFileUrl]);
+  }, [recordingUrl, uploadedFileUrl, audioContext]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
       const selectedFile = event.target.files[0];
-      setFile(selectedFile);
-      
-      const fileUrl = URL.createObjectURL(selectedFile);
-      setUploadedFileUrl(fileUrl);
+      if (selectedFile.type.startsWith('audio/')) {
+        setFile(selectedFile);
+        const fileUrl = URL.createObjectURL(selectedFile);
+        setUploadedFileUrl(fileUrl);
+      } else {
+        alert('Please select an audio file');
+      }
     }
   };
-
 
   const checkMicrophonePermission = async (): Promise<boolean> => {
     try {
       setRecordingError(null);
       
-      // Check if browser supports getUserMedia
       if (!navigator.mediaDevices?.getUserMedia) {
         setRecordingError("Your browser doesn't support audio recording. Please try a different browser.");
         return false;
       }
       
-      // Request permissions
       await navigator.mediaDevices.getUserMedia({ audio: true });
       return true;
     } catch (error) {
@@ -98,6 +101,15 @@ export default function Home() {
       
       const recorder = new MediaRecorder(stream, options);
       recordedChunksRef.current = [];
+
+      // Set up audio visualization
+      const audioCtx = new AudioContext();
+      const source = audioCtx.createMediaStreamSource(stream);
+      const analyserNode = audioCtx.createAnalyser();
+      analyserNode.fftSize = 2048;
+      source.connect(analyserNode);
+      setAudioContext(audioCtx);
+      setAnalyser(analyserNode);
 
       recorder.ondataavailable = (event) => {
         if (event.data && event.data.size > 0) {
@@ -148,365 +160,331 @@ export default function Home() {
     setRecordingError(null);
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (file && uploadedFileUrl) {
-      router.push(`/results?file=${encodeURIComponent(file.name)}&fileUrl=${encodeURIComponent(uploadedFileUrl)}`);
+      setIsAnalyzing(true);
+      try {
+        await router.push(`/results?file=${encodeURIComponent(file.name)}&fileUrl=${encodeURIComponent(uploadedFileUrl)}`);
+      } catch (error) {
+        console.error("Error submitting file:", error);
+        setIsAnalyzing(false);
+      }
     }
   };
 
-  const submitFile = () => {
+  const submitFile = async () => {
     if (file) {
-      if (recordingUrl) {
-        router.push(`/results?file=${encodeURIComponent(file.name)}&isRecording=true&recordingUrl=${encodeURIComponent(recordingUrl)}`);
-      } else {
-        router.push(`/results?file=${encodeURIComponent(file.name)}&isRecording=true`);
+      setIsAnalyzing(true);
+      try {
+        if (recordingUrl) {
+          await router.push(`/results?file=${encodeURIComponent(file.name)}&isRecording=true&recordingUrl=${encodeURIComponent(recordingUrl)}`);
+        } else {
+          await router.push(`/results?file=${encodeURIComponent(file.name)}&isRecording=true`);
+        }
+      } catch (error) {
+        console.error("Error submitting file:", error);
+        setIsAnalyzing(false);
       }
     }
   };
 
   return (
-    <div className="min-h-screen bg-white text-gray-800 font-sans">
-      {/* Header with Mobile Support */}
-      <header className="flex items-center justify-between py-4 px-4 sm:px-8 bg-white border-b border-gray-100 sticky top-0 left-0 right-0 z-50">
-        <div className="text-2xl font-bold text-green-700">NerVox</div>
-        
-        {/* Mobile menu button */}
-        <button 
-          className="md:hidden flex items-center text-gray-700"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
-        >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            {mobileMenuOpen ? (
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            ) : (
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            )}
-          </svg>
-        </button>
-        
-        {/* Desktop Navigation */}
-        <nav className="hidden md:block">
-          <ul className="flex space-x-8">
-            <li>
-              <a href="#hero" className="text-gray-700 hover:text-green-700 font-medium">Home</a>
-            </li>
-            <li>
-              <a href="#solutions" className="text-gray-700 hover:text-green-700 font-medium">Solutions</a>
-            </li>
-            <li>
-              <a href="#case-studies" className="text-gray-700 hover:text-green-700 font-medium">Case Studies</a>
-            </li>
-            <li>
-              <a href="#contact" className="text-gray-700 hover:text-green-700 font-medium">Our Team</a>
-            </li>
-            <li>
-              <a href="#contact" className="text-gray-700 hover:text-green-700 font-medium">Contact</a>
-            </li>
-          </ul>
-        </nav>
-        
-        {/* Desktop CTA Button */}
-        <a 
-          href="#upload" 
-          className="hidden md:block bg-green-700 hover:bg-green-800 text-white py-2 px-4 rounded-md font-medium transition-colors"
-        >
-          Try Neural Network
-        </a>
+    <div className="min-h-screen bg-background">
+      {/* Header - Similar to Vytal.ai */}
+      <header className="sticky top-0 z-50 w-full bg-primary text-white">
+        <div className="container mx-auto flex h-16 items-center justify-between px-4">
+          <Link className="flex items-center space-x-2" href="/">
+            <span className="font-bold text-xl">NerVox</span>
+          </Link>
+          <nav className="hidden md:flex items-center space-x-8">
+            <Link href="/api" className="text-sm font-medium hover:text-white/80">API</Link>
+            <Link href="/solutions" className="text-sm font-medium hover:text-white/80">Solutions</Link>
+            <Link href="/test" className="text-sm font-medium hover:text-white/80">Test Demo</Link>
+            <Link href="/team" className="text-sm font-medium hover:text-white/80">Our Team</Link>
+            <Link href="/news" className="text-sm font-medium hover:text-white/80">News</Link>
+            <Link href="/contact" className="text-sm font-medium hover:text-white/80">Contact</Link>
+          </nav>
+          <div className="flex items-center space-x-4">
+            <Link href="/try-api" className="bg-white text-primary px-4 py-1 rounded-full text-sm font-medium hover:bg-white/90">
+              Try API
+            </Link>
+          </div>
+        </div>
+        <div className="bg-accent text-white text-center py-1 text-xs">
+          <span>NerVox 2.0: Analyze voice data with our new neural models.</span>
+        </div>
       </header>
 
-      {/* Mobile Navigation Menu */}
-      {mobileMenuOpen && (
-        <div className="md:hidden bg-white py-4 px-6 shadow-md fixed z-40 w-full">
-          <nav>
-            <ul className="flex flex-col space-y-4">
-              <li>
-                <a 
-                  href="#hero" 
-                  className="text-gray-700 hover:text-green-700 font-medium block py-2"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Home
-                </a>
-              </li>
-              <li>
-                <a 
-                  href="#solutions" 
-                  className="text-gray-700 hover:text-green-700 font-medium block py-2"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Solutions
-                </a>
-              </li>
-              <li>
-                <a 
-                  href="#case-studies" 
-                  className="text-gray-700 hover:text-green-700 font-medium block py-2"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Case Studies
-                </a>
-              </li>
-              <li>
-                <a 
-                  href="#contact" 
-                  className="text-gray-700 hover:text-green-700 font-medium block py-2"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Our Team
-                </a>
-              </li>
-              <li>
-                <a 
-                  href="#contact" 
-                  className="text-gray-700 hover:text-green-700 font-medium block py-2"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Contact
-                </a>
-              </li>
-              <li>
-                <a 
-                  href="#upload"
-                  className="bg-green-700 hover:bg-green-800 text-white py-2 px-4 rounded-md font-medium transition-colors block text-center"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Try Neural Network
-                </a>
-              </li>
-            </ul>
-          </nav>
-        </div>
-      )}
-
-      {/* Hero Section - updated for mobile */}
-      <section
-        id="hero"
-        className="py-16 md:py-24 px-4 md:px-6 bg-gradient-to-b from-white to-green-50"
-      >
-        <div className="max-w-6xl mx-auto text-center" data-aos="fade-up">
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 text-gray-800 leading-tight">
-            Your Voice is the Gateway<br className="hidden sm:block" />to Untapped Knowledge.
-          </h1>
-          <p className="text-lg md:text-xl max-w-2xl mx-auto mb-10 text-gray-600">
-            Creating Scalable, Hardware-Free Voice Analysis Using Advanced LSTM Neural Networks For Research and Industry.
-          </p>
-          <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-            <a
-              href="#upload"
-              className="px-8 py-3 bg-green-700 text-white rounded-md text-lg hover:bg-green-800 transition-colors"
-              data-aos="fade-up"
-              data-aos-delay="200"
-            >
-              Try Our Voice Analysis AI
-            </a>
-            <a
-              href="#about"
-              className="px-8 py-3 border border-green-700 text-green-700 rounded-md text-lg hover:bg-green-50 transition-colors"
-              data-aos="fade-up"
-              data-aos-delay="300"
-            >
-              Learn More
-            </a>
-          </div>
-        </div>
-      </section>
-
-      {/* About Section */}
-      <section id="about" className="py-16 md:py-20 px-4 md:px-6 bg-white" data-aos="fade-up">
-        <div className="max-w-4xl mx-auto text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6 text-gray-800">About</h2>
-          <p className="text-base md:text-lg text-gray-600">
-            We&apos;ve developed the first <span className="font-semibold">accurate</span> and <span className="font-semibold">scalable</span> voice analysis system using multi-head attention LSTM neural networks. It&apos;s now publicly available, and we&apos;ve applied it ourselves to build software for brain health assessment, neurology research, and mental wellness monitoring.
-          </p>
-        </div>
-      </section>
-
-      {/* Solutions Section */}
-      <section id="solutions" className="py-16 md:py-20 px-4 md:px-6 bg-gray-50" data-aos="fade-up">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold mb-8 md:mb-12 text-gray-800 text-center">Our Solutions</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-            <div className="p-6 md:p-8 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow" data-aos="fade-up" data-aos-delay="100">
-              <h3 className="text-xl md:text-2xl font-semibold mb-4 text-green-700">Real-Time Voice Analysis</h3>
-              <p className="text-gray-600">
-                Our neural network continuously monitors speech patterns to detect anomalies indicative of neurological conditions.
-              </p>
+      {/* Main Content */}
+      <main>
+        {/* Hero Section - With particle effect like Vytal */}
+        <section className="bg-white py-20 relative overflow-hidden">
+          <div className="container mx-auto px-4 text-center relative z-10">
+            <div className="mx-auto mb-12 max-w-[300px] h-[300px] relative" data-aos="zoom-in" data-aos-duration="1000">
+              <ParticleEffect />
             </div>
-            <div className="p-6 md:p-8 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow" data-aos="fade-up" data-aos-delay="200">
-              <h3 className="text-xl md:text-2xl font-semibold mb-4 text-green-700">Non-Invasive Diagnostics</h3>
-              <p className="text-gray-600">
-                Use a standard laptop microphone with our AI for hassle-free, on-the-go assessments.
-              </p>
-            </div>
-            <div className="p-6 md:p-8 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow" data-aos="fade-up" data-aos-delay="300">
-              <h3 className="text-xl md:text-2xl font-semibold mb-4 text-green-700">Actionable Reports</h3>
-              <p className="text-gray-600">
-                Our LSTM model generates detailed insights and metrics to help clinicians tailor treatment plans.
-              </p>
+            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl mb-6" data-aos="fade-up" data-aos-delay="200">
+              Your Voice is the Gateway<br />to Untapped Knowledge.
+            </h1>
+            <p className="max-w-[800px] mx-auto text-gray-600 text-lg mb-10" data-aos="fade-up" data-aos-delay="300">
+              Creating Scalable, Hardware-Free Voice Analysis Solutions For Research and Industry.
+            </p>
+            <div className="flex justify-center space-x-4" data-aos="fade-up" data-aos-delay="400">
+              <Link href="#analyze" className="bg-primary text-white px-6 py-3 rounded-md hover:bg-primary/90 transition-colors hover:scale-105 transition-transform">
+                Try Our Voice Analysis
+              </Link>
+              <Link href="/solutions" className="border border-primary text-primary px-6 py-3 rounded-md hover:bg-secondary transition-colors hover:scale-105 transition-transform">
+                Learn More
+              </Link>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Case Studies Section */}
-      <section id="case-studies" className="py-16 md:py-20 px-4 md:px-6 bg-white" data-aos="fade-up">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold mb-8 md:mb-12 text-gray-800 text-center">Case Studies</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
-            <div className="bg-gray-50 p-6 md:p-8 rounded-xl" data-aos="fade-up" data-aos-delay="100">
-              <h3 className="text-xl md:text-2xl font-semibold mb-4 text-green-700">
-                Early Detection in Clinical Trials
-              </h3>
-              <p className="text-gray-600">
-                Our solution was implemented in clinical trials, accurately identifying early speech anomalies in patients, leading to timely interventions.
-              </p>
-            </div>
-            <div className="bg-gray-50 p-6 md:p-8 rounded-xl" data-aos="fade-up" data-aos-delay="200">
-              <h3 className="text-xl md:text-2xl font-semibold mb-4 text-green-700">
-                Enhancing Telehealth Diagnostics
-              </h3>
-              <p className="text-gray-600">
-                Integrated with telehealth platforms, our AI tool enables remote monitoring of speech patterns, ensuring that doctors can diagnose conditions without the need for in-person visits.
-              </p>
-            </div>
+        {/* About Section */}
+        <section className="bg-secondary py-16">
+          <div className="container mx-auto px-4 text-center">
+            <h2 className="text-2xl font-bold mb-6" data-aos="fade-up">ABOUT</h2>
+            <p className="max-w-[900px] mx-auto text-gray-700 mb-8" data-aos="fade-up" data-aos-delay="100">
+              We&apos;ve developed the first <span className="font-semibold">accurate</span> and <span className="font-semibold">scalable</span> webcam voice-analysis system. It&apos;s now publicly available, and we&apos;ve applied it ourselves to build software for brain health assessment, neuroplasma research, and mental wellness monitoring.
+            </p>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* File Upload / Record Section */}
-      <section id="upload" className="py-16 md:py-20 px-4 md:px-6 bg-green-50" data-aos="fade-up">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6 text-gray-800">Submit Your Speech Sample</h2>
-          <p className="text-base md:text-lg mb-8 text-gray-600">
-            Choose to record on the spot or upload a file for AI-powered neurological analysis.
-          </p>
-          {/* Toggle buttons */}
-          <div className="inline-flex p-1 mb-8 bg-gray-100 rounded-lg">
-            <button
-              className={`px-4 sm:px-6 py-2 sm:py-3 rounded-md font-medium ${mode === 'upload' ? 'bg-green-700 text-white' : 'text-gray-600 hover:bg-gray-200'} transition-colors`}
-              onClick={() => setMode('upload')}
-            >
-              Upload File
-            </button>
-            <button
-              className={`px-4 sm:px-6 py-2 sm:py-3 rounded-md font-medium ${mode === 'record' ? 'bg-green-700 text-white' : 'text-gray-600 hover:bg-gray-200'} transition-colors`}
-              onClick={() => setMode('record')}
-            >
-              Record Audio
-            </button>
-          </div>
-
-          <div className="bg-white p-6 md:p-8 rounded-xl shadow-sm">
-            {mode === 'upload' ? (
-              // File upload form
-              <form onSubmit={handleSubmit} className="flex flex-col items-center">
-                {!uploadedFileUrl ? (
-                  // Show file input only when no file is selected
-                  <input
-                    type="file"
-                    accept="audio/*"
-                    onChange={handleFileChange}
-                    className="mb-6 p-3 border border-gray-200 rounded-lg w-full max-w-md"
-                  />
-                ) : (
-                  // Show audio preview when file is selected
-                  <div className="w-full max-w-md mb-6">
-                    <p className="text-md text-gray-600 mb-2">Preview your audio:</p>
-                    <audio controls src={uploadedFileUrl} className="w-full mb-4"></audio>
-                  </div>
-                )}
-                
-                <button 
-                  type="submit" 
-                  className="px-6 sm:px-8 py-3 bg-green-700 text-white rounded-md text-lg hover:bg-green-800 transition-colors w-full sm:w-auto max-w-xs"
-                  disabled={!file}
-                >
-                  Submit for Analysis
-                </button>
-              </form>
-            ) : (
-              // Recording interface
-              <div className="flex flex-col items-center">
-                {recordingError && (
-                  <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-md w-full max-w-md text-left">
-                    <p className="font-medium">Error:</p>
-                    <p>{recordingError}</p>
-                  </div>
-                )}
-                
-                {!isRecording && !recordingUrl && (
-                  <button
-                    onClick={startRecording}
-                    className="px-6 sm:px-8 py-3 bg-green-700 text-white rounded-md text-lg hover:bg-green-800 transition-colors w-full sm:w-auto max-w-xs"
-                  >
-                    Start Recording
-                  </button>
-                )}
-                {isRecording && (
-                  <button
-                    onClick={stopRecording}
-                    className="px-6 sm:px-8 py-3 bg-red-500 text-white rounded-md text-lg hover:bg-red-600 transition-colors w-full sm:w-auto max-w-xs"
-                  >
-                    Stop Recording
-                  </button>
-                )}
-                {recordingUrl && (
-                  <div className="w-full max-w-md">
-                    <audio controls src={recordingUrl} className="w-full mb-6"></audio>
-                    <div className="flex flex-col sm:flex-row justify-center space-y-3 sm:space-y-0 sm:space-x-4">
-                      <button
-                        onClick={resetRecording}
-                        className="px-5 py-2 border border-gray-300 text-gray-600 rounded-md hover:bg-gray-50 transition-colors"
-                      >
-                        Record Again
-                      </button>
-                      <button
-                        onClick={submitFile}
-                        className="px-6 py-2 bg-green-700 text-white rounded-md hover:bg-green-800 transition-colors"
-                      >
-                        Submit for Analysis
-                      </button>
-                    </div>
-                  </div>
-                )}
+        {/* Features Section */}
+        <section className="py-20">
+          <div className="container mx-auto px-4">
+            <h2 className="text-3xl font-bold mb-12 text-center" data-aos="fade-up">Key Features</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow" data-aos="fade-up" data-aos-delay="100">
+                <div className="text-primary text-3xl mb-4">01</div>
+                <h3 className="text-xl font-semibold mb-2">Advanced Neural Models</h3>
+                <p className="text-gray-600">
+                  Our advanced neural models analyze voice patterns to detect subtle indicators of neurological conditions.
+                </p>
               </div>
-            )}
+              <div className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow" data-aos="fade-up" data-aos-delay="200">
+                <div className="text-primary text-3xl mb-4">02</div>
+                <h3 className="text-xl font-semibold mb-2">Non-Invasive Analysis</h3>
+                <p className="text-gray-600">
+                  Get valuable insights without invasive procedures. All you need is a voice recording.
+                </p>
+              </div>
+              <div className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow" data-aos="fade-up" data-aos-delay="300">
+                <div className="text-primary text-3xl mb-4">03</div>
+                <h3 className="text-xl font-semibold mb-2">Seamless Integration</h3>
+                <p className="text-gray-600">
+                  Easy to integrate into your existing systems with our robust API and SDKs.
+                </p>
+              </div>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Contact Section */}
-      <section id="contact" className="py-16 md:py-20 px-4 md:px-6 bg-white" data-aos="fade-up">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6 text-gray-800">Get in Touch</h2>
-          <p className="text-base md:text-lg mb-8 text-gray-600">
-            Interested in learning more about our innovative diagnostic solutions? Contact us today to schedule a demo or consult with our experts.
-          </p>
-          <a
-            href="mailto:contact@nervox.ai"
-            className="inline-block px-6 sm:px-8 py-3 bg-green-700 text-white rounded-md text-lg hover:bg-green-800 transition-colors"
-          >
-            Contact Us
-          </a>
-        </div>
-      </section>
+        {/* Upload Section */}
+        <section id="analyze" className="py-20 bg-secondary">
+          <div className="container mx-auto px-4">
+            <div className="max-w-4xl mx-auto">
+              <div className="text-center mb-12" data-aos="fade-up">
+                <h2 className="text-3xl font-bold mb-4">Try Voice Analysis Now</h2>
+                <p className="text-gray-700">
+                  Upload an audio file or record your voice to see our analysis in action.
+                </p>
+              </div>
+
+              <div className="bg-white rounded-xl shadow-sm p-8" data-aos="fade-up" data-aos-delay="100">
+                <div className="mb-6">
+                  <div className="flex justify-center space-x-4 mb-6">
+                    <Button
+                      variant={mode === 'upload' ? 'default' : 'outline'}
+                      onClick={() => setMode('upload')}
+                      className={`min-w-[120px] ${mode === 'upload' ? 'bg-primary text-white hover:bg-primary/90' : ''} transition-all hover:scale-105`}
+                    >
+                      <Upload className="mr-2 h-4 w-4" />
+                      Upload
+                    </Button>
+                    <Button
+                      variant={mode === 'record' ? 'default' : 'outline'}
+                      onClick={() => setMode('record')}
+                      className={`min-w-[120px] ${mode === 'record' ? 'bg-primary text-white hover:bg-primary/90' : ''} transition-all hover:scale-105`}
+                    >
+                      <Mic className="mr-2 h-4 w-4" />
+                      Record
+                    </Button>
+                  </div>
+
+                  {mode === 'upload' ? (
+                    <div className="space-y-4" data-aos="fade-up" data-aos-delay="200">
+                      <form onSubmit={handleSubmit} className="space-y-4">
+                        <div className="border-2 border-dashed border-primary/20 rounded-xl p-8 text-center hover:border-primary/40 transition-all hover:bg-primary/5">
+                          <input
+                            type="file"
+                            accept="audio/*"
+                            onChange={handleFileChange}
+                            className="hidden"
+                            id="file-upload"
+                          />
+                          <label
+                            htmlFor="file-upload"
+                            className="cursor-pointer flex flex-col items-center"
+                          >
+                            <FileAudio className="h-12 w-12 text-primary/60 mb-2 transition-transform hover:scale-110" />
+                            <span className="text-sm text-gray-500">
+                              {file ? file.name : 'Click to upload an audio file'}
+                            </span>
+                          </label>
+                        </div>
+                        {file && uploadedFileUrl && (
+                          <div className="space-y-4" data-aos="fade-up">
+                            <audio controls src={uploadedFileUrl} className="w-full" />
+                            <Button type="submit" className="w-full animate-pulse hover:animate-none" disabled={isAnalyzing}>
+                              {isAnalyzing ? 'Analyzing...' : 'Analyze Audio'}
+                            </Button>
+                          </div>
+                        )}
+                      </form>
+                    </div>
+                  ) : (
+                    <div className="space-y-4" data-aos="fade-up" data-aos-delay="200">
+                      <div className="flex justify-center">
+                        <Button
+                          onClick={isRecording ? stopRecording : startRecording}
+                          variant={isRecording ? 'destructive' : 'default'}
+                          className={`w-24 h-24 rounded-full transition-all ${isRecording ? 'animate-pulse' : 'hover:scale-105'}`}
+                        >
+                          {isRecording ? 'Stop' : 'Record'}
+                        </Button>
+                      </div>
+                      {isRecording && analyser && (
+                        <AudioVisualizer
+                          analyser={analyser}
+                          isRecording={isRecording}
+                        />
+                      )}
+                      {recordingError && (
+                        <div className="text-destructive text-sm text-center">{recordingError}</div>
+                      )}
+                      {recordingUrl && (
+                        <div className="space-y-4" data-aos="fade-up">
+                          <audio controls src={recordingUrl} className="w-full" />
+                          <Button onClick={submitFile} className="w-full animate-pulse hover:animate-none" disabled={isAnalyzing}>
+                            {isAnalyzing ? 'Analyzing...' : 'Analyze Audio'}
+                          </Button>
+                          <Button onClick={resetRecording} variant="outline" className="w-full">
+                            Record Again
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Use Cases Section */}
+        <section className="py-20">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-12" data-aos="fade-up">
+              <h2 className="text-3xl font-bold mb-4">Use Cases</h2>
+              <p className="text-gray-600 max-w-2xl mx-auto">
+                Our voice analysis technology can be applied in various fields:
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow" data-aos="fade-up" data-aos-delay="100">
+                <div className="p-6">
+                  <h3 className="text-lg font-semibold mb-2">Healthcare</h3>
+                  <p className="text-gray-600">Early detection of neurological conditions through voice analysis.</p>
+                </div>
+              </div>
+              <div className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow" data-aos="fade-up" data-aos-delay="200">
+                <div className="p-6">
+                  <h3 className="text-lg font-semibold mb-2">Research</h3>
+                  <p className="text-gray-600">Advanced tools for neuroscience and linguistic research.</p>
+                </div>
+              </div>
+              <div className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow" data-aos="fade-up" data-aos-delay="300">
+                <div className="p-6">
+                  <h3 className="text-lg font-semibold mb-2">Elder Care</h3>
+                  <p className="text-gray-600">Monitoring cognitive health in aging populations.</p>
+                </div>
+              </div>
+              <div className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow" data-aos="fade-up" data-aos-delay="400">
+                <div className="p-6">
+                  <h3 className="text-lg font-semibold mb-2">Telemedicine</h3>
+                  <p className="text-gray-600">Remote assessment capabilities for healthcare providers.</p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="text-center mt-10" data-aos="fade-up" data-aos-delay="500">
+              <Link href="/solutions" className="inline-flex items-center text-primary font-medium hover:underline">
+                Learn more about our solutions <ExternalLink className="ml-2 h-4 w-4" />
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* CTA Section */}
+        <section className="bg-primary text-white py-16">
+          <div className="container mx-auto px-4 text-center" data-aos="fade-up">
+            <h2 className="text-3xl font-bold mb-6">Ready to Get Started?</h2>
+            <p className="text-xl opacity-90 mb-8 max-w-2xl mx-auto">
+              Integrate our voice analysis technology into your applications and start gaining valuable insights today.
+            </p>
+            <div className="flex flex-col sm:flex-row justify-center gap-4">
+              <Link href="/api" className="bg-white text-primary px-6 py-3 rounded-md hover:bg-white/90 transition-all hover:scale-105">
+                Explore API
+              </Link>
+              <Link href="/contact" className="border border-white text-white px-6 py-3 rounded-md hover:bg-primary/80 transition-all hover:scale-105">
+                Contact Us
+              </Link>
+            </div>
+          </div>
+        </section>
+      </main>
 
       {/* Footer */}
-      <footer className="py-8 md:py-10 bg-gray-50 text-center px-4">
-        <div className="flex justify-center space-x-6 mb-4">
-          <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-green-700">
-            <i className="fab fa-linkedin text-xl"></i>
-          </a>
-          <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-green-700">
-            <i className="fab fa-github text-xl"></i>
-          </a>
-          <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-green-700">
-            <i className="fab fa-twitter text-xl"></i>
-          </a>
+      <footer className="bg-gray-900 text-white py-10">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div data-aos="fade-up" data-aos-delay="100">
+              <h3 className="font-bold text-xl mb-4">NerVox</h3>
+              <p className="text-gray-400">
+                Advanced voice analysis platform for healthcare professionals and researchers.
+              </p>
+            </div>
+            <div data-aos="fade-up" data-aos-delay="200">
+              <h4 className="font-semibold mb-4">Products</h4>
+              <ul className="space-y-2">
+                <li><Link href="/api" className="text-gray-400 hover:text-white">API</Link></li>
+                <li><Link href="/solutions" className="text-gray-400 hover:text-white">Solutions</Link></li>
+                <li><Link href="/pricing" className="text-gray-400 hover:text-white">Pricing</Link></li>
+              </ul>
+            </div>
+            <div data-aos="fade-up" data-aos-delay="300">
+              <h4 className="font-semibold mb-4">Resources</h4>
+              <ul className="space-y-2">
+                <li><Link href="/docs" className="text-gray-400 hover:text-white">Documentation</Link></li>
+                <li><Link href="/blog" className="text-gray-400 hover:text-white">Blog</Link></li>
+                <li><Link href="/support" className="text-gray-400 hover:text-white">Support</Link></li>
+              </ul>
+            </div>
+            <div data-aos="fade-up" data-aos-delay="400">
+              <h4 className="font-semibold mb-4">Legal</h4>
+              <ul className="space-y-2">
+                <li><Link href="/privacy" className="text-gray-400 hover:text-white">Privacy Policy</Link></li>
+                <li><Link href="/terms" className="text-gray-400 hover:text-white">Terms of Service</Link></li>
+              </ul>
+            </div>
+          </div>
+          <div className="border-t border-gray-800 mt-8 pt-8 text-center">
+            <p className="text-gray-400">© 2024 NerVox. All rights reserved.</p>
+          </div>
         </div>
-        <p className="text-gray-500">&copy; 2025 NerVox. All rights reserved.</p>
       </footer>
     </div>
   );

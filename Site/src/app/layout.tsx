@@ -1,19 +1,18 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
+import { AOSProvider } from "@/components/aos-provider";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "NerVox",
+  title: "NerVox - Advanced Voice Analysis",
+  description: "Advanced AI-powered voice analysis platform for healthcare professionals",
+  keywords: ["voice analysis", "AI", "healthcare", "medical", "diagnostics"],
 };
 
 export default function RootLayout({
@@ -22,11 +21,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
+    <html lang="en" suppressHydrationWarning className="light">
+      <body className={`${inter.variable} font-sans antialiased min-h-screen bg-white`}>
+        <AOSProvider>
+          {children}
+        </AOSProvider>
       </body>
     </html>
   );
